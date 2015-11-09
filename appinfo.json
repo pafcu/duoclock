@@ -1,0 +1,26 @@
+{
+    "appKeys": {
+        "KEY_KNOWN_WORDS": 0,
+        "KEY_NUM_KNOWN_WORDS": 1
+    },
+    "capabilities": [
+        "configurable"
+    ],
+    "companyName": "pafcu@iki.fi",
+    "longName": "DuoClock",
+    "projectType": "native",
+    "resources": {
+        "media": []
+    },
+    "sdkVersion": "3",
+    "shortName": "DuoClock",
+    "targetPlatforms": [
+        "aplite",
+        "basalt"
+    ],
+    "uuid": "7545c3b2-4e89-4453-91e7-e98a506fc2d7",
+    "versionLabel": "1.0",
+    "watchapp": {
+        "watchface": true
+    }
+}

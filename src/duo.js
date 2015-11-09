@@ -1,0 +1,81 @@
+
+// Function to get keys of a dictionary
+var keys = function(o){
+   if (o !== Object(o))
+      throw new TypeError('Object.keys called on non-object');
+   var ret=[],p;
+   for(p in o) if(Object.prototype.hasOwnProperty.call(o,p)) ret.push(p);
+   return ret;
+};
+
+// Function to send Ajax request
+var xhrRequest = function (url, type, callback) {
+  var xhr = new XMLHttpRequest();
+  xhr.onload = function () {
+    callback(this.responseText);
+  };
+  xhr.open(type, url);
+  xhr.send();
+};
+
+function get_words(username, lang) {
+  var url = "https://www.duolingo.com/users/"+username;
+  
+  // List all known words. Use a dictionary to simulate a set
+  // May break at any time since the Duolingo API is not really public
+  xhrRequest(url,'GET', function (responseText) {  
+    var json = JSON.parse(responseText);
+    console.log(responseText);
+    var known_words = {};
+  
+    var skills = json.language_data[lang].skills;
+    for(var iskill in skills) {
+      var skill = skills[iskill];
+      if(skill.learned) {
+        for(var iword in skill.words) {
+          var word = skill.words[iword];
+          known_words[word] = 1;
+        }
+      }
+    }
+    console.log(responseText);
+    
+    var words = keys(known_words);
+    console.log(words.join('|'));
+    
+    // Send data to Pebble
+    var dictionary = {
+      'KEY_KNOWN_WORDS': words.join('|'),
+      'KEY_NUM_KNOWN_WORDS': words.length,
+    };
+    
+    Pebble.sendAppMessage(dictionary,
+      function(e) {
+        console.log("Data sent to Pebble successfully!");
+      },
+      function(e) {
+        console.log("Error sending data to Pebble!");
+      }
+    );
+  });
+}
+
+// Listen for when the watchface is opened
+Pebble.addEventListener('ready', 
+  function(e) {
+    get_words('pafcu','fr');
+  }
+);
+
+// Listen for when an AppMessage is received
+Pebble.addEventListener('appmessage',
+  function(e) {
+    console.log('AppMessage received!');
+    get_words('pafcu','fr');
+  }                     
+);
+
+Pebble.addEventListener('showConfiguration', function(e) {
+  // Show config page
+  Pebble.openURL('https://reddit.com/');
+});
