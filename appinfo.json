@@ -16,7 +16,8 @@
     "shortName": "DuoClock",
     "targetPlatforms": [
         "aplite",
-        "basalt"
+        "basalt",
+        "chalk"
     ],
     "uuid": "7545c3b2-4e89-4453-91e7-e98a506fc2d7",
     "versionLabel": "1.0",

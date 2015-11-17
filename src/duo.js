@@ -36,9 +36,9 @@ function send_words(words) {
 }
 
 function get_words(username, lang) {
-  console.log('Getting Duolingo words for user '+username)
+  console.log('Getting Duolingo words for user ' + username);
   if(username === null) {
-    send_words(['','']);
+    send_words(['']);
     return;
   }
   var url = "https://www.duolingo.com/users/"+username;
@@ -47,9 +47,6 @@ function get_words(username, lang) {
   // May break at any time since the Duolingo API is not really public
   xhrRequest(url,'GET', function (responseText) {  
     var json = JSON.parse(responseText);
-    console.log("Response:"+ responseText);
-    console.log("End of response");
-    console.log(json);
     var known_words = {};
   
     var skills = json.language_data[lang].skills;
@@ -62,10 +59,9 @@ function get_words(username, lang) {
         }
       }
     }
-    console.log(responseText);
     
     var words = keys(known_words);
-    console.log(words.join('|'));
+    //console.log(words.join('|'));
     
     send_words(words);
   });
@@ -74,17 +70,11 @@ function get_words(username, lang) {
 function fetch() {
   get_words(localStorage.duo_username, 'fr');
 }
+
 // Listen for when the watchface is opened
 Pebble.addEventListener('ready', 
   function(e) {
     fetch();
+    setInterval(fetch, 24*60*60*1000); // Update words every day
   }
-);
-
-// Listen for when an AppMessage is received
-Pebble.addEventListener('appmessage',
-  function(e) {
-    console.log('AppMessage received!');
-    fetch();
-  }                     
 );
