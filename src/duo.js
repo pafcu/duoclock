@@ -1,3 +1,4 @@
+var lang_codes = ['fr','en','fi','sv','de'];
 
 // Function to get keys of a dictionary
 var keys = function(o){
@@ -20,9 +21,17 @@ var xhrRequest = function (url, type, callback) {
 
 function send_words(words) {
   // Send data to Pebble
+  var language;
+  if(isNaN(1*localStorage.language)) { // Force to integer
+    language = 0; // Fallback
+  }
+  else {
+    language = 1*localStorage.language;
+  }
   var dictionary = {
     'KEY_KNOWN_WORDS': words.join('|'),
     'KEY_NUM_KNOWN_WORDS': words.length,
+    'KEY_LANGUAGE': language 
   };
     
   Pebble.sendAppMessage(dictionary,
@@ -49,31 +58,34 @@ function get_words(username, lang) {
     var json = JSON.parse(responseText);
     var known_words = {};
   
-    var skills = json.language_data[lang].skills;
-    for(var iskill in skills) {
-      var skill = skills[iskill];
-      if(skill.learned) {
-        for(var iword in skill.words) {
-          var word = skill.words[iword];
-          known_words[word] = 1;
+    if(lang in json.language_data) {
+      var skills = json.language_data[lang].skills;
+      for(var iskill in skills) {
+        var skill = skills[iskill];
+        if(skill.learned) {
+          for(var iword in skill.words) {
+            var word = skill.words[iword];
+            known_words[word] = 1;
+          }
         }
       }
     }
-    
     var words = keys(known_words);
-    //console.log(words.join('|'));
     
     send_words(words);
   });
 }
 
 function fetch() {
-  get_words(localStorage.duo_username, 'fr');
+  get_words(localStorage.duo_username, lang_codes[localStorage.language]);
 }
 
 // Listen for when the watchface is opened
-Pebble.addEventListener('ready', 
+Pebble.addEventListener('ready',
   function(e) {
+    if(localStorage.language === null) {
+      localStorage.language = 0;
+    }
     fetch();
     setInterval(fetch, 24*60*60*1000); // Update words every day
   }

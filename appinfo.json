@@ -1,6 +1,7 @@
 {
     "appKeys": {
         "KEY_KNOWN_WORDS": 0,
+        "KEY_LANGUAGE": 2,
         "KEY_NUM_KNOWN_WORDS": 1
     },
     "capabilities": [
@@ -20,7 +21,7 @@
         "chalk"
     ],
     "uuid": "7545c3b2-4e89-4453-91e7-e98a506fc2d7",
-    "versionLabel": "1.0",
+    "versionLabel": "1.1",
     "watchapp": {
         "watchface": true
     }
