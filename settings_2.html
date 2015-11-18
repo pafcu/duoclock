@@ -33,7 +33,7 @@
       <div class='item-container-content'>
         <label class='item'>
           Language
-          <select class="item-select" name="language">
+          <select class="item-select" id="language">
             <option value='0' class="item-select-option">French</option>
             <option value='1' class="item-select-option">English</option>
             <option value='2' class="item-select-option">Finnish</option>
@@ -71,13 +71,16 @@
   <script>
   function getConfigData() {
     var username = document.getElementById('username');
+    var language = document.getElementById('language');
 
     var options = {
       'username': username.value,
+      'language': language.value,
     };
 
     // Save for next launch
     localStorage['username'] = options['username'];
+    localStorage['language'] = options['language'];
     console.log('Got options: ' + JSON.stringify(options));
     return options;
   }
