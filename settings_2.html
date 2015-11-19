@@ -107,9 +107,13 @@
   });
   (function() {
     var username = document.getElementById('username');
+    var language = document.getElementById('language');
     // Load any previously saved configuration, if available
     if(localStorage['username']) {
       username.value = localStorage['username'];
+    }
+    if(localStorage['language']) {
+      language.selectedIndex = localStorage['language'];
     }
   })();
   </script>
