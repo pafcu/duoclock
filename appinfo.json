@@ -11,7 +11,20 @@
     "longName": "DuoClock",
     "projectType": "native",
     "resources": {
-        "media": []
+        "media": [
+            {
+                "characterRegex": "[\u0430-\u044f ]",
+                "file": "fonts/didact.ttf",
+                "name": "FONT_DIDACT_CYRILLIC_22",
+                "type": "font"
+            },
+            {
+                "characterRegex": "[\u0430-\u044f ]",
+                "file": "fonts/didact.ttf",
+                "name": "FONT_DIDACT_CYRILLIC_24",
+                "type": "font"
+            }
+        ]
     },
     "sdkVersion": "3",
     "shortName": "DuoClock",

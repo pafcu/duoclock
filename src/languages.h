@@ -1,18 +1,9 @@
 #pragma once
-#define MAX_NUMBER_LENGTH 32
+#include <pebble.h>
+#include "duo_clock.h"
 
-typedef struct {
-  int code;
-  char lang_code[3];
-  char intro[12];
-  char separator[12];
-  char tens[5][16];
-  char first[20][MAX_NUMBER_LENGTH];
-} language_t;
-
-#define LANG_COUNT 5
-
-typedef enum {LANG_FR, LANG_EN, LANG_FI, LANG_SV, LANG_DE} lang_t;
+#define LANG_COUNT 6
+typedef enum {LANG_FR, LANG_EN, LANG_FI, LANG_SV, LANG_DE, LANG_RU} lang_t;
 
 language_t languages[] = {
   {
@@ -20,7 +11,11 @@ language_t languages[] = {
     .intro = "Il est",
     .separator = "heures",
     .tens = {"vingt","trente","quarante","cinquante","soixante"},
-    .first = {"zéro","un","deux","trois","quatre","cinq","six","sept","huit","neuf","dix","onze","douze","trieze","quatorze","quinze","seixe","dix-sept","dix-huit","dix-neuf"}
+    .first = {"zéro","un","deux","trois","quatre","cinq","six","sept","huit","neuf","dix","onze","douze","trieze","quatorze","quinze","seixe","dix-sept","dix-huit","dix-neuf"},
+    .bigfont = DEFAULT_BIG_FONT,
+    .smallfont = DEFAULT_SMALL_FONT,
+    .customfont = false,
+    .layout = LAYOUT_SEPARATOR
   },
   {
     .lang_code = "en",
@@ -28,6 +23,10 @@ language_t languages[] = {
     .separator = "",
     .tens = {"twenty","thirty","fourty","fifty","sixty"},
     .first = {"zero","one","two","three","four","five","six","seven","eight","nine","ten","eleven","twelve","thirteen","fourteen","fifteen","sixteen","seventeen","eighteen","nineteen"},
+    .bigfont = DEFAULT_BIG_FONT,
+    .smallfont = DEFAULT_SMALL_FONT,
+    .customfont = false,
+    .layout = LAYOUT_NO_SEPARATOR
   },
   {
     .lang_code = "fi",
@@ -35,6 +34,10 @@ language_t languages[] = {
     .separator = "",
     .tens = {"kaksikymmentä","kolmekymmentä","neljäkymmentä","viisikymmentä","kuusikymmentä"},
     .first = {"nolla","yksi","kaksi","kolme","neljä","viisi","kuusi","seitsemän","kahdeksan","yhdeksän","kymmenen","yksitoista","kaksitoista","kolmetoista","neljätoista","viisitoista","kuusitoista","seitsemäntoista","kahdeksantoista","yhdeksäntoista"},
+    .bigfont = FONT_KEY_GOTHIC_24_BOLD,
+    .smallfont = DEFAULT_SMALL_FONT,
+    .customfont = false,
+    .layout = LAYOUT_NO_SEPARATOR_LONG_HOUR
   },
   {
     .lang_code = "sv",
@@ -42,6 +45,10 @@ language_t languages[] = {
     .separator = "",
     .tens = {"tjugo","trettio","fyrttio","femtio","sextio"},
     .first = {"noll","ett","två","tre","fyra","fem","sex","sju","åtta","nio","tio","elva","tolv","tretton","fjorton","femton","sexton","sjutton","aderton","nitton"},
+    .bigfont = DEFAULT_BIG_FONT,
+    .smallfont = DEFAULT_SMALL_FONT,
+    .customfont = false,
+    .layout = LAYOUT_NO_SEPARATOR
   },
   {
     .lang_code = "de",
@@ -49,5 +56,20 @@ language_t languages[] = {
     .separator = "Uhr",
     .tens = {"zwanzig","dreißig","vierzig","fünfzig","sechzig"},
     .first = {"null","ein","zwei","drei","vier","fünf","sechs","sieben","acht","neun","zehn","elf","zwölf","dreizehn","vierzehn","fünfzehn","sechzehn","achtzehn","neunzehn"},
+    .bigfont = DEFAULT_BIG_FONT,
+    .smallfont = DEFAULT_SMALL_FONT,
+    .customfont = false,
+    .layout = LAYOUT_SEPARATOR
+  },
+  {
+    .lang_code = "ru",
+    .intro = "",
+    .separator = "",
+    .tens = {"двадцать","тридцать","сорок","пятьдесят","шестьдесят"},
+    .first = {"ноль","один","два","три","четыре","пять","шесть","семь","восемь","девять","десять","одиннадцать","двенадцать","тринадцать","четырнадцать","пятнадцать","шестнадцать","семнадцать","восемнадцать","девятнадцать"},
+    .bigfont = (char*)RESOURCE_ID_FONT_DIDACT_CYRILLIC_22,
+    .smallfont = (char*)RESOURCE_ID_FONT_DIDACT_CYRILLIC_22,
+    .customfont = true,
+    .layout = LAYOUT_NO_SEPARATOR
   },
 };

@@ -47,7 +47,8 @@ function send_words(words) {
 function get_words(username, lang) {
   console.log('Getting Duolingo words for user ' + username);
   if(username === null) {
-    send_words(['']);
+    //send_words(['unconfigured']);
+    send_words([]);
     return;
   }
   var url = "https://www.duolingo.com/users/"+username;
@@ -69,6 +70,9 @@ function get_words(username, lang) {
           }
         }
       }
+    }
+    else {
+      //known_words[''] = 0;
     }
     var words = keys(known_words);
     
