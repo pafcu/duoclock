@@ -135,6 +135,9 @@
     }
     if(localStorage['waiver']) {
       waiver.checked = localStorage['waiver'];
+      if(waiver.checked) {
+        document.getElementById('password').disabled = false;
+      }
     }
     if(localStorage['language']) {
       language.selectedIndex = localStorage['language'];
