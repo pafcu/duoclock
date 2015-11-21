@@ -1,4 +1,4 @@
-var lang_codes = ['fr','en','fi','sv','de'];
+var lang_codes = ['fr','en','fi','sv','de', 'ru'];
 
 // Function to get keys of a dictionary
 var keys = function(o){
@@ -33,7 +33,9 @@ function send_words(words) {
     'KEY_NUM_KNOWN_WORDS': words.length,
     'KEY_LANGUAGE': language 
   };
-    
+  
+  console.log("Sending " + words.length + " words to Pebble");
+  
   Pebble.sendAppMessage(dictionary,
     function(e) {
       console.log("Data sent to Pebble successfully!");
@@ -71,9 +73,6 @@ function get_words(username, lang) {
         }
       }
     }
-    else {
-      //known_words[''] = 0;
-    }
     var words = keys(known_words);
     
     send_words(words);
@@ -81,8 +80,23 @@ function get_words(username, lang) {
 }
 
 function fetch() {
-  get_words(localStorage.duo_username, lang_codes[localStorage.language]);
+  if !(localStorage.language in lang_codes) {
+    console.log("ERROR: invalid lang code " + localStorage.language);
+  }
+  else {
+    get_words(localStorage.duo_username, lang_codes[localStorage.language]);  
+  }
 }
+
+Pebble.addEventListener('appmessage',
+  function(e) {
+    console.log("JS got an appmessage " + e.payload.KEY_SEND_WORDS);
+    if(e.payload.KEY_SEND_WORDS !== undefined) {
+      console.log("Received request for language " + e.payload.KEY_SEND_WORDS);
+      localStorage.language = e.payload.KEY_SEND_WORDS;
+      fetch();
+    }
+});
 
 // Listen for when the watchface is opened
 Pebble.addEventListener('ready',

@@ -2,7 +2,8 @@
     "appKeys": {
         "KEY_KNOWN_WORDS": 0,
         "KEY_LANGUAGE": 2,
-        "KEY_NUM_KNOWN_WORDS": 1
+        "KEY_NUM_KNOWN_WORDS": 1,
+        "KEY_SEND_WORDS": 3
     },
     "capabilities": [
         "configurable"

@@ -4,6 +4,7 @@
 #define KEY_KNOWN_WORDS 0
 #define KEY_NUM_KNOWN_WORDS 1
 #define KEY_LANGUAGE 2
+#define KEY_SEND_WORDS 3
 
 #define PERSIST_LANGUAGE 0
 
@@ -33,8 +34,6 @@ static void update_word(time_t time) {
   }
 }
 
-
-
 static void update_layout() {
   const language_t *cur_lang = &languages[current_language];
   
@@ -43,8 +42,6 @@ static void update_layout() {
   
   Layer* window_layer = window_get_root_layer(window);
   GRect bounds = layer_get_frame(window_layer);
-  
-  
   
   GFont bigfont;
   GFont smallfont;
@@ -96,6 +93,9 @@ static void update_layout() {
 }
 
 static void inbox_received_callback(DictionaryIterator *iterator, void *context) {
+  
+  APP_LOG(APP_LOG_LEVEL_DEBUG,"Pebble received appmessage");
+  
   Tuple *word_tuple = dict_find(iterator, KEY_KNOWN_WORDS);
   Tuple *num_words_tuple = dict_find(iterator, KEY_NUM_KNOWN_WORDS);
   Tuple *language_tuple = dict_find(iterator, KEY_LANGUAGE);
@@ -105,21 +105,29 @@ static void inbox_received_callback(DictionaryIterator *iterator, void *context)
     APP_LOG(APP_LOG_LEVEL_ERROR, "Error in inbox recv");
     return;
   }
-  
-  set_language(language_tuple->value->int32, false);
-  
   num_words = num_words_tuple->value->int32;
-  APP_LOG(APP_LOG_LEVEL_ERROR, "Language %d num words %d",current_language,num_words);
+  
   if(num_words < 1) {
+    if(words) {
+      free(words);
+      words = 0;
+    }
+    text_layer_set_text(text_layers[4], "");
     return;
   }
   
-  if(words) free(words);
+  if(words) {
+    free(words);
+    words = 0;
+  }
   words = (char**)malloc(num_words*sizeof(char*));
   
   len = strlen(word_tuple->value->cstring);
 
-  if(words_buffer) free(words_buffer);
+  if(words_buffer) {
+    free(words_buffer);
+    words_buffer = 0;
+  }
   words_buffer = (char*)malloc(len+1);
 
   strncpy(words_buffer,word_tuple->value->cstring,len);
@@ -130,7 +138,8 @@ static void inbox_received_callback(DictionaryIterator *iterator, void *context)
     words[i] = get_word('|', words[i-1]);
   }
   
-  update_word(time(0));
+  set_language(language_tuple->value->int32, false);
+  APP_LOG(APP_LOG_LEVEL_DEBUG, "Language %d num words %d",current_language,num_words);
 }
 
 static void inbox_dropped_callback(AppMessageResult reason, void *context) {
@@ -172,7 +181,13 @@ static void handle_init(void) {
   }
 
   if(persist_exists(PERSIST_LANGUAGE)) {
-    current_language = persist_read_int(PERSIST_LANGUAGE);
+    int tmp_lang = persist_read_int(PERSIST_LANGUAGE); // Use tmp int so we can compare against negative values
+    if(tmp_lang < 0 || tmp_lang > LANG_COUNT -1) {
+      current_language = 0;
+    }
+    else {
+      current_language = tmp_lang;
+    }
   }
   else {
     current_language = 0;
@@ -211,7 +226,7 @@ static void handle_init(void) {
   window_set_click_config_provider(window, click_config_provider);
 }
 
-void set_language(lang_t lang, bool get_words) {
+static void set_language(lang_t lang, bool get_words) {
   current_language = lang;
   make_numbers(&languages[lang], numbers_str);
   text_layer_set_text(text_layers[0], languages[lang].intro);
@@ -220,30 +235,38 @@ void set_language(lang_t lang, bool get_words) {
     text_layer_set_text(text_layers[2], languages[lang].separator);  
   }
   
+  text_layer_set_text(text_layers[4], "");
+
   update_layout();
   persist_write_int(PERSIST_LANGUAGE, current_language);
   time_t curtime = time(NULL);
+
   handle_minute_tick(localtime(&curtime), 0);
+  
+  if(get_words) {
+    request_words();
+  }
 }
 
 static void up_click_handler(ClickRecognizerRef recognizer, void *context) {
   if(current_language == 0) {
-    set_language(LANG_COUNT-1, true);
+    set_language(LANG_COUNT - 1, true);
   }
   else {
-    set_language(current_language-1, true);
+    set_language(current_language - 1, true);
   }
 }
 static void down_click_handler(ClickRecognizerRef recognizer, void *context) {
-  if(current_language >= LANG_COUNT) {
+  if(current_language >= LANG_COUNT - 1) {
     set_language(0, true);
   }
   else {
-    set_language(current_language+1, true);
+    set_language(current_language + 1, true);
   }
 }
 static void mid_click_handler(ClickRecognizerRef recognizer, void *context) {
   demo_mode = !demo_mode;
+   
   if(demo_mode) {
     tick_timer_service_subscribe(SECOND_UNIT, handle_minute_tick);
   }
@@ -258,7 +281,16 @@ static void click_config_provider(void *context) {
   window_single_click_subscribe(BUTTON_ID_DOWN, down_click_handler);
 }
 
-void handle_deinit(void) {
+static void request_words() {
+  APP_LOG(APP_LOG_LEVEL_DEBUG, "Message requesting words");
+
+  DictionaryIterator *iter;
+  app_message_outbox_begin(&iter);
+  dict_write_uint8(iter, KEY_SEND_WORDS, current_language);
+  app_message_outbox_send();
+}
+
+static void handle_deinit(void) {
 	/*for(int i=0;i<4;i++) {
     text_layer_destroy(text_layers[i]);
   }
