@@ -15,13 +15,19 @@
             {
                 "characterRegex": "[\u0430-\u044f ]",
                 "file": "fonts/didact.ttf",
-                "name": "FONT_DIDACT_CYRILLIC_24",
+                "name": "FONT_DIDACT_CYRILLIC_18",
                 "type": "font"
             },
             {
                 "characterRegex": "[\u0430-\u044f ]",
                 "file": "fonts/didact.ttf",
                 "name": "FONT_DIDACT_CYRILLIC_22",
+                "type": "font"
+            },
+            {
+                "characterRegex": "[\u0430-\u044f ]",
+                "file": "fonts/didact.ttf",
+                "name": "FONT_DIDACT_CYRILLIC_24",
                 "type": "font"
             }
         ]

@@ -34,52 +34,6 @@ static void update_word(time_t time) {
 }
 
 
-static void make_numbers(language_t* lang) {
-  APP_LOG(APP_LOG_LEVEL_DEBUG, "Making numbers for language %s %d",lang->lang_code,lang->code);
-
-  memcpy(numbers_str,lang->first,sizeof(char)*20*MAX_NUMBER_LENGTH);
-  
-  for(int tens=2;tens<6; tens++) {
-    for(int digit=0;digit<10;digit++) {
-      if(digit == 0) {
-        snprintf(numbers_str[(tens)*10+digit],MAX_NUMBER_LENGTH,"%s",lang->tens[tens-2]);
-      }
-      else {
-        switch(lang->code) {
-          case LANG_FR:
-            if(digit == 1) {
-              snprintf(numbers_str[(tens)*10+digit],MAX_NUMBER_LENGTH,"%s et %s",lang->tens[tens-2],lang->first[digit]);
-            }
-            else {
-              snprintf(numbers_str[(tens)*10+digit],MAX_NUMBER_LENGTH,"%s-%s",lang->tens[tens-2],lang->first[digit]);
-            }
-            break;
-          
-          case LANG_EN:
-            snprintf(numbers_str[(tens)*10+digit],MAX_NUMBER_LENGTH,"%s-%s",lang->tens[tens-2],lang->first[digit]);
-            break;
-          
-          case LANG_FI:
-            snprintf(numbers_str[(tens)*10+digit],MAX_NUMBER_LENGTH,"%s-\n%s",lang->tens[tens-2],lang->first[digit]);
-            break;
-          
-          case LANG_SV:
-            snprintf(numbers_str[(tens)*10+digit],MAX_NUMBER_LENGTH,"%s%s",lang->tens[tens-2],lang->first[digit]);
-            break;
-          
-          case LANG_DE:
-            snprintf(numbers_str[(tens)*10+digit],MAX_NUMBER_LENGTH,"%s und %s",lang->first[digit],lang->tens[tens-2]);
-            break;
-          
-          case LANG_RU:
-            snprintf(numbers_str[(tens)*10+digit],MAX_NUMBER_LENGTH,"%s %s",lang->tens[tens-2],lang->first[digit]);
-            break;
-        }  
-      }
-    }
-  }
-   APP_LOG(APP_LOG_LEVEL_DEBUG, "Made numbers");
-}
 
 static void update_layout() {
   const language_t *cur_lang = &languages[current_language];
@@ -90,8 +44,7 @@ static void update_layout() {
   Layer* window_layer = window_get_root_layer(window);
   GRect bounds = layer_get_frame(window_layer);
   
-  text_layer_set_text(text_layers[0], cur_lang->intro);
-  text_layer_set_text(text_layers[2], cur_lang->separator);
+  
   
   GFont bigfont;
   GFont smallfont;
@@ -203,9 +156,13 @@ static void handle_minute_tick(struct tm* tick_time, TimeUnits units_changed) {
     h = tick_time->tm_hour;
     m = tick_time->tm_min;
   }
+  
   text_layer_set_text(text_layers[1],numbers_str[h]);
   text_layer_set_text(text_layers[3],numbers_str[m]);
   
+  if(languages[current_language].separator_callback) {
+    text_layer_set_text(text_layers[2],languages[current_language].separator_callback(h,m));
+  }
   update_word(mktime(tick_time));
 }
 
@@ -256,9 +213,17 @@ static void handle_init(void) {
 
 void set_language(lang_t lang, bool get_words) {
   current_language = lang;
-  make_numbers(&languages[lang]);
+  make_numbers(&languages[lang], numbers_str);
+  text_layer_set_text(text_layers[0], languages[lang].intro);
+  
+  if(!languages[lang].separator_callback) {
+    text_layer_set_text(text_layers[2], languages[lang].separator);  
+  }
+  
   update_layout();
   persist_write_int(PERSIST_LANGUAGE, current_language);
+  time_t curtime = time(NULL);
+  handle_minute_tick(localtime(&curtime), 0);
 }
 
 static void up_click_handler(ClickRecognizerRef recognizer, void *context) {
