@@ -19,7 +19,6 @@
 
   <body>
     <h1 class='title'>Configure DuoClock</h1>
-
     <div class='item-container'>
       <div class='item-container-content'>
         <div class='item'>
@@ -54,12 +53,23 @@
         <label class='item'>
           Username
           <div class="item-input-wrapper">
-            <input type="text" class="item-input" name="username" id="username" placeholder="Enter your Duolingo username here">
+            <input type="text" class="item-input" id="username" placeholder="Enter your Duolingo username here">
           </div>
         </label>
-      </div>
-      <div class='item-container-footer'>
-        Your username on Duolingo
+        <label class='item'>
+          Password
+          <div class="item-input-wrapper">
+            <input type="password" class="item-input" id="password" placeholder="Enter your Duolingo password here" disabled='disabled'>
+          </div>
+        </label>
+        <div id='waiver_div'>
+        <label class='item'>
+          I acknowledge I'm being irresponsible with my Duolingo password <input type='checkbox' id='waiver' class='item-toggle' onclick='handleWaiver()'>
+        </label>
+        <div class="item-container-footer">
+          If you do not enter your password, you will only get words from the language you have last used on duolingo.com. However, in general, it is a <em>BAD IDEA</em> to give any password to a third party (such as DuoClock) and, therefore, it is recommended that you <em>DO NOT ENTER YOUR PASSWORD HERE</em>. However, if you really trust this application (maybe you have inspected the source code?) you can enable using a password.
+        </div>
+        </div>
       </div>
     </div>
 
@@ -73,14 +83,20 @@
   function getConfigData() {
     var username = document.getElementById('username');
     var language = document.getElementById('language');
+    var password = document.getElementById('password');
+    var waiver = document.getElementById('waiver');
 
     var options = {
       'username': username.value,
       'language': language.value,
+      'password': password.value,
+      'waiver': waiver.checked,
     };
 
     // Save for next launch
     localStorage['username'] = options['username'];
+    localStorage['password'] = options['password'];
+    localStorage['waiver'] = options['waiver'];
     localStorage['language'] = options['language'];
     console.log('Got options: ' + JSON.stringify(options));
     return options;
@@ -107,14 +123,34 @@
   });
   (function() {
     var username = document.getElementById('username');
+    var password = document.getElementById('password');
+    var waiver = document.getElementById('waiver');
     var language = document.getElementById('language');
     // Load any previously saved configuration, if available
     if(localStorage['username']) {
       username.value = localStorage['username'];
     }
+    if(localStorage['password']) {
+      username.value = localStorage['password'];
+    }
+    if(localStorage['waiver']) {
+      waiver.checked = localStorage['waiver'];
+    }
     if(localStorage['language']) {
       language.selectedIndex = localStorage['language'];
     }
+
+    if(getQueryParam('iknowwhatimdoing', false)) {
+      document.getElementById('waiver_div').style.display='none';
+      document.getElementById('password').disabled = false;
+    }
   })();
+
+  function handleWaiver() {
+    document.getElementById("password").disabled = !document.getElementById("waiver").checked;
+    if(!document.getElementById("waiver").checked) {
+      document.getElementById("password").value = '';
+    }
+  }
   </script>
 </html>
