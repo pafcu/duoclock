@@ -1,9 +1,31 @@
 #pragma once
 #include <pebble.h>
-#include "duo_clock.h"
 
 #define LANG_COUNT 6
+#define MAX_NUMBER_LENGTH 50
+#define TEXT_LAYER_COUNT 5
+
+#define LAYOUT_SEPARATOR {10,28,60,78,138}
+#define LAYOUT_NO_SEPARATOR {28,46,-1,78,138}
+#define LAYOUT_NO_SEPARATOR_LONG_HOUR {5,23,-1,83,140}
+
+#define DEFAULT_BIG_FONT FONT_KEY_GOTHIC_28_BOLD
+#define DEFAULT_SMALL_FONT FONT_KEY_GOTHIC_18
+
 typedef enum {LANG_FR, LANG_EN, LANG_FI, LANG_SV, LANG_DE, LANG_RU} lang_t;
+
+typedef struct {
+  lang_t code;
+  int16_t layout[TEXT_LAYER_COUNT];
+  char lang_code[3];
+  char intro[12];
+  char separator[12];
+  char tens[5][32];
+  char first[20][MAX_NUMBER_LENGTH];
+  char* bigfont;
+  char* smallfont;
+  bool customfont;
+} language_t;
 
 language_t languages[] = {
   {
@@ -55,8 +77,8 @@ language_t languages[] = {
     .intro = "Es ist",
     .separator = "Uhr",
     .tens = {"zwanzig","dreißig","vierzig","fünfzig","sechzig"},
-    .first = {"null","ein","zwei","drei","vier","fünf","sechs","sieben","acht","neun","zehn","elf","zwölf","dreizehn","vierzehn","fünfzehn","sechzehn","achtzehn","neunzehn"},
-    .bigfont = DEFAULT_BIG_FONT,
+    .first = {"null","ein","zwei","drei","vier","fünf","sechs","sieben","acht","neun","zehn","elf","zwölf","dreizehn","vierzehn","fünfzehn","sechzehn","siebzehn","achtzehn","neunzehn"},
+    .bigfont = FONT_KEY_GOTHIC_24_BOLD,
     .smallfont = DEFAULT_SMALL_FONT,
     .customfont = false,
     .layout = LAYOUT_SEPARATOR

@@ -1,5 +1,5 @@
 #include <pebble.h>
-#include "languages.h"
+#include "duo_clock.h"
 
 #define KEY_KNOWN_WORDS 0
 #define KEY_NUM_KNOWN_WORDS 1
@@ -15,8 +15,11 @@ static lang_t current_language = 0;
 
 static char numbers_str[60][MAX_NUMBER_LENGTH];
 static int num_words = 0;
-static char** words = 0; // Max 1000 words
+static char** words = 0;
 static char* words_buffer = 0;
+
+static bool demo_mode = false;
+
 
 static char* get_word(char separator, char* c) {
   while(*c != '\0' && *c != separator) c++;
@@ -150,12 +153,8 @@ static void inbox_received_callback(DictionaryIterator *iterator, void *context)
     return;
   }
   
-  current_language = language_tuple->value->int32;
-  persist_write_int(PERSIST_LANGUAGE, current_language);
-  make_numbers(&languages[current_language]);
-
-  update_layout();
-
+  set_language(language_tuple->value->int32, false);
+  
   num_words = num_words_tuple->value->int32;
   APP_LOG(APP_LOG_LEVEL_ERROR, "Language %d num words %d",current_language,num_words);
   if(num_words < 1) {
@@ -195,8 +194,17 @@ static void outbox_sent_callback(DictionaryIterator *iterator, void *context) {
 
 
 static void handle_minute_tick(struct tm* tick_time, TimeUnits units_changed) {
-  text_layer_set_text(text_layers[1],numbers_str[tick_time->tm_hour]);
-  text_layer_set_text(text_layers[3],numbers_str[tick_time->tm_min]);
+  int h, m;
+  if(demo_mode) {
+    h = tick_time->tm_sec%24;
+    m = tick_time->tm_sec;
+  }
+  else {
+    h = tick_time->tm_hour;
+    m = tick_time->tm_min;
+  }
+  text_layer_set_text(text_layers[1],numbers_str[h]);
+  text_layer_set_text(text_layers[3],numbers_str[m]);
   
   update_word(mktime(tick_time));
 }
@@ -212,7 +220,6 @@ static void handle_init(void) {
   else {
     current_language = 0;
   }
-  make_numbers(&languages[current_language]);
   
   window = window_create();
   window_set_background_color(window, GColorBlack);
@@ -222,38 +229,20 @@ static void handle_init(void) {
 
   time_layer = layer_create(bounds);
 
-  const language_t *cur_lang = &languages[current_language];
-  const int16_t* layout = cur_lang->layout;
-
-  text_layers[0] = text_layer_create(GRect(0, 0, bounds.size.w, bounds.size.h));
-  text_layer_set_text(text_layers[0], cur_lang->intro);
-  
-  text_layers[1] = text_layer_create(GRect(0,0,bounds.size.w,0));
-  
-  text_layers[2] = text_layer_create(GRect(0, 0,bounds.size.w,0));
-  text_layer_set_text(text_layers[2], cur_lang->separator);
-  
-  text_layers[3] = text_layer_create(GRect(0, 0,bounds.size.w,0));
-  
-  text_layers[4] = text_layer_create(GRect(0, 0,bounds.size.w,0));
-  
   for(int i=0;i<TEXT_LAYER_COUNT; i++) {
+    text_layers[i] = text_layer_create(GRect(0, 0, bounds.size.w, 0));
 	  text_layer_set_text_alignment(text_layers[i], GTextAlignmentCenter);
     text_layer_set_text_color(text_layers[i], GColorWhite);
     text_layer_set_background_color(text_layers[i], GColorBlack);
     layer_add_child(time_layer, text_layer_get_layer(text_layers[i]));
-
-    if(layout[i] < 0) {
-      layer_set_hidden(text_layer_get_layer(text_layers[i]), true);
-    }
   }
-  update_layout();
   
   layer_add_child(window_layer, time_layer);
 	window_stack_push(window, true);
 	
-  tick_timer_service_subscribe(MINUTE_UNIT, handle_minute_tick);
+  set_language(current_language, false);
   
+  tick_timer_service_subscribe(MINUTE_UNIT, handle_minute_tick);
   
   app_message_register_inbox_received(inbox_received_callback);
   app_message_register_inbox_dropped(inbox_dropped_callback);
@@ -261,6 +250,47 @@ static void handle_init(void) {
   app_message_register_outbox_sent(outbox_sent_callback);
   
   app_message_open(app_message_inbox_size_maximum(), app_message_outbox_size_maximum());
+  
+  window_set_click_config_provider(window, click_config_provider);
+}
+
+void set_language(lang_t lang, bool get_words) {
+  current_language = lang;
+  make_numbers(&languages[lang]);
+  update_layout();
+  persist_write_int(PERSIST_LANGUAGE, current_language);
+}
+
+static void up_click_handler(ClickRecognizerRef recognizer, void *context) {
+  if(current_language == 0) {
+    set_language(LANG_COUNT-1, true);
+  }
+  else {
+    set_language(current_language-1, true);
+  }
+}
+static void down_click_handler(ClickRecognizerRef recognizer, void *context) {
+  if(current_language >= LANG_COUNT) {
+    set_language(0, true);
+  }
+  else {
+    set_language(current_language+1, true);
+  }
+}
+static void mid_click_handler(ClickRecognizerRef recognizer, void *context) {
+  demo_mode = !demo_mode;
+  if(demo_mode) {
+    tick_timer_service_subscribe(SECOND_UNIT, handle_minute_tick);
+  }
+  else {
+      tick_timer_service_subscribe(MINUTE_UNIT, handle_minute_tick);
+  }
+}
+
+static void click_config_provider(void *context) {
+  window_single_click_subscribe(BUTTON_ID_UP, up_click_handler);
+  window_single_click_subscribe(BUTTON_ID_SELECT, mid_click_handler);
+  window_single_click_subscribe(BUTTON_ID_DOWN, down_click_handler);
 }
 
 void handle_deinit(void) {
