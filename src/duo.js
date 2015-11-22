@@ -56,8 +56,9 @@ function login(username, password, then_do) {
   var login_url = 'https://www.duolingo.com/login';
   var params = "login="+username+"&password="+password+"&=Login";
   xhrRequest(login_url,'POST',params, function(response) {
+    console.log(response.getAllResponseHeaders());
     if(response.status != 200) {
-      console.log('Login status ' + resonse.statusText);
+      console.log('Login status ' + response.statusText);
       console.log("Login reply: " + response.responseText);
     }
     then_do();
@@ -69,7 +70,7 @@ function switch_lang(lang, then_do) {
     var params = 'learning_language='+lang;
     xhrRequest(switch_url,'POST',params, function(response) {
       if(response.status != 200) {
-        console.log('Switch status ' + resonse.statusText);
+        console.log('Switch status ' + response.statusText);
         console.log("Switch reply: " + response.responseText);
       }
       console.log("Switch reply: " + response.responseText);
@@ -79,6 +80,11 @@ function switch_lang(lang, then_do) {
 }
 
 function get_words(username, password, lang) {
+   if(username === null) {
+    send_words([]);
+    return;
+  }
+  
   if(password === '') {
     console.log("Getting words without password " + username);
     get_current_words(username, lang);
@@ -95,11 +101,7 @@ function get_words(username, password, lang) {
 
 function get_current_words(username, lang) {
   console.log('Getting Duolingo words for user ' + username);
-  if(username === null) {
-    send_words([]);
-    return;
-  }
-    
+     
   var url = "https://www.duolingo.com/users/"+username;
 
   // List all known words. Use a dictionary to simulate a set

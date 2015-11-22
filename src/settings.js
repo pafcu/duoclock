@@ -1,6 +1,8 @@
 Pebble.addEventListener('showConfiguration', function(e) {
   // Show config page
-  Pebble.openURL('https://pafcu.github.io/duoclock/settings_2.html');
+  //var configUrl = 'https://pafcu.github.io/duoclock/settings_2.html';
+  var configUrl = 'http://beam.helsinki.fi/~saparvia/duoclock/settings_2.html';
+  Pebble.openURL(configUrl);
 });
 
 Pebble.addEventListener('webviewclosed', function(e) {
@@ -8,6 +10,7 @@ Pebble.addEventListener('webviewclosed', function(e) {
   console.log('Configuration page returned: ' + JSON.stringify(configData));
   localStorage.duo_username = configData.username;
   localStorage.language = configData.language;
-  localStorage.password = configData.password;
+  //localStorage.password = configData.password; // Password does not currently work due to Pebble not setting cookies
+  localStorage.password = '';
   fetch();
 });

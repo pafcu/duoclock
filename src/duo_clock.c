@@ -1,3 +1,10 @@
+/*
+DuoClock
+
+Original author: Stefan Parviainen, 2015
+Licensed under the GPLv3, see LICENCE
+
+*/
 #include <pebble.h>
 #include "duo_clock.h"
 
