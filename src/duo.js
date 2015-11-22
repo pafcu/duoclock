@@ -10,13 +10,19 @@ var keys = function(o){
 };
 
 // Function to send Ajax request
-var xhrRequest = function (url, type, callback) {
+var xhrRequest = function (url, type, params, callback) {
   var xhr = new XMLHttpRequest();
   xhr.onload = function () {
-    callback(this.responseText);
+    callback(this);
   };
   xhr.open(type, url);
-  xhr.send();
+  if(params) {
+    xhr.setRequestHeader("Content-type", "application/x-www-form-urlencoded");
+    xhr.send(params);
+  }
+  else {
+    xhr.send();
+  }
 };
 
 function send_words(words) {
@@ -46,19 +52,60 @@ function send_words(words) {
   );
 }
 
-function get_words(username, lang) {
+function login(username, password, then_do) {
+  var login_url = 'https://www.duolingo.com/login';
+  var params = "login="+username+"&password="+password+"&=Login";
+  xhrRequest(login_url,'POST',params, function(response) {
+    if(response.status != 200) {
+      console.log('Login status ' + resonse.statusText);
+      console.log("Login reply: " + response.responseText);
+    }
+    then_do();
+  });
+}
+
+function switch_lang(lang, then_do) {
+  var switch_url = 'https://www.duolingo.com/switch_language';
+    var params = 'learning_language='+lang;
+    xhrRequest(switch_url,'POST',params, function(response) {
+      if(response.status != 200) {
+        console.log('Switch status ' + resonse.statusText);
+        console.log("Switch reply: " + response.responseText);
+      }
+      console.log("Switch reply: " + response.responseText);
+
+      then_do();
+    });    
+}
+
+function get_words(username, password, lang) {
+  if(password === '') {
+    console.log("Getting words without password " + username);
+    get_current_words(username, lang);
+  }
+  else {
+    console.log("Getting words using password " + username);
+    login(username, password, function() {
+      switch_lang(lang, function() {
+        get_current_words(username, lang);
+      });
+    });
+  }
+}
+
+function get_current_words(username, lang) {
   console.log('Getting Duolingo words for user ' + username);
   if(username === null) {
-    //send_words(['unconfigured']);
     send_words([]);
     return;
   }
+    
   var url = "https://www.duolingo.com/users/"+username;
 
   // List all known words. Use a dictionary to simulate a set
   // May break at any time since the Duolingo API is not really public
-  xhrRequest(url,'GET', function (responseText) {  
-    var json = JSON.parse(responseText);
+  xhrRequest(url,'GET', null, function (response) {  
+    var json = JSON.parse(response.responseText);
     var known_words = {};
   
     if(lang in json.language_data) {
@@ -79,12 +126,13 @@ function get_words(username, lang) {
   });
 }
 
+
 function fetch() {
-  if !(localStorage.language in lang_codes) {
+  if (!(localStorage.language in lang_codes)) {
     console.log("ERROR: invalid lang code " + localStorage.language);
   }
   else {
-    get_words(localStorage.duo_username, lang_codes[localStorage.language]);  
+    get_words(localStorage.duo_username, localStorage.password, lang_codes[localStorage.language]);  
   }
 }
 
@@ -100,7 +148,7 @@ Pebble.addEventListener('appmessage',
 
 // Listen for when the watchface is opened
 Pebble.addEventListener('ready',
-  function(e) {
+  function(e) {   
     if(localStorage.language === null) {
       localStorage.language = 0;
     }

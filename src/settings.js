@@ -8,5 +8,6 @@ Pebble.addEventListener('webviewclosed', function(e) {
   console.log('Configuration page returned: ' + JSON.stringify(configData));
   localStorage.duo_username = configData.username;
   localStorage.language = configData.language;
+  localStorage.password = configData.password;
   fetch();
 });

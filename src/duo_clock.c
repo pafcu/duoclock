@@ -102,17 +102,21 @@ static void inbox_received_callback(DictionaryIterator *iterator, void *context)
 
   int len = 0;
   if(!num_words_tuple || !word_tuple || !language_tuple) {
-    APP_LOG(APP_LOG_LEVEL_ERROR, "Error in inbox recv");
+    APP_LOG(APP_LOG_LEVEL_ERROR, "Error in inbox recv %p %p %p",num_words_tuple, word_tuple, language_tuple);
     return;
   }
+  
   num_words = num_words_tuple->value->int32;
   
   if(num_words < 1) {
     if(words) {
       free(words);
       words = 0;
+      
     }
     text_layer_set_text(text_layers[4], "");
+    set_language(language_tuple->value->int32, false);
+    APP_LOG(APP_LOG_LEVEL_DEBUG, "Got no words, returning");
     return;
   }
   
