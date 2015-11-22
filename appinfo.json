@@ -14,6 +14,17 @@
     "resources": {
         "media": [
             {
+                "file": "images/icon.png",
+                "menuIcon": true,
+                "name": "IMAGE_ICON",
+                "targetPlatforms": [
+                    "aplite",
+                    "basalt",
+                    "chalk"
+                ],
+                "type": "png"
+            },
+            {
                 "characterRegex": "[\u0430-\u044f ]",
                 "file": "fonts/didact.ttf",
                 "name": "FONT_DIDACT_CYRILLIC_18",
