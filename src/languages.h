@@ -1,43 +1,46 @@
 #pragma once
 #include <pebble.h>
 
-#define LANG_COUNT 6
+#define LANG_COUNT 7
 #define MAX_NUMBER_LENGTH 50
 #define TEXT_LAYER_COUNT 5
 
-#define LAYOUT_SEPARATOR {10,28,60,78,138}
+#define LAYOUT_SEPARATOR {4,23,57,78,138}
 #define LAYOUT_NO_SEPARATOR {28,46,-1,78,138}
 #define LAYOUT_NO_SEPARATOR_LONG_HOUR {5,23,-1,83,140}
 
 #define DEFAULT_BIG_FONT FONT_KEY_GOTHIC_28_BOLD
 #define DEFAULT_SMALL_FONT FONT_KEY_GOTHIC_18
 
-typedef enum {LANG_FR, LANG_EN, LANG_FI, LANG_SV, LANG_DE, LANG_RU} lang_t;
+typedef enum {LANG_FR, LANG_EN, LANG_FI, LANG_SV, LANG_DE, LANG_ES, LANG_RU} lang_t;
 
-typedef const char* (*separator_cb)(int h, int m);
+typedef const char* (*time_cb)(int h, int m);
 
 typedef struct {
   lang_t code;
   int16_t layout[TEXT_LAYER_COUNT];
   char lang_code[3];
   char intro[12];
+  time_cb intro_callback;
   char separator[12];
+  time_cb separator_callback;
   char tens[5][32];
   char first[20][MAX_NUMBER_LENGTH];
   char* bigfont;
   char* smallfont;
   bool customfont;
-  separator_cb separator_callback;
 } language_t;
 
 const char* separator_fr(int h, int m);
 const char* separator_ru(int h, int m);
 
+const char* intro_es(int h, int m);
 
 language_t languages[] = {
   {
     .lang_code = "fr",
     .intro = "Il est",
+    .intro_callback = NULL,
     .separator = "",
     .tens = {"vingt","trente","quarante","cinquante","soixante"},
     .first = {"zéro","un","deux","trois","quatre","cinq","six","sept","huit","neuf","dix","onze","douze","trieze","quatorze","quinze","seixe","dix-sept","dix-huit","dix-neuf"},
@@ -50,6 +53,7 @@ language_t languages[] = {
   {
     .lang_code = "en",
     .intro = "It is",
+    .intro_callback = NULL,
     .separator = "",
     .tens = {"twenty","thirty","fourty","fifty","sixty"},
     .first = {"zero","one","two","three","four","five","six","seven","eight","nine","ten","eleven","twelve","thirteen","fourteen","fifteen","sixteen","seventeen","eighteen","nineteen"},
@@ -62,6 +66,7 @@ language_t languages[] = {
   {
     .lang_code = "fi",
     .intro = "Kello on",
+    .intro_callback = NULL,
     .separator = "",
     .tens = {"kaksikymmentä","kolmekymmentä","neljäkymmentä","viisikymmentä","kuusikymmentä"},
     .first = {"nolla","yksi","kaksi","kolme","neljä","viisi","kuusi","seitsemän","kahdeksan","yhdeksän","kymmenen","yksitoista","kaksitoista","kolmetoista","neljätoista","viisitoista","kuusitoista","seitsemäntoista","kahdeksantoista","yhdeksäntoista"},
@@ -74,6 +79,7 @@ language_t languages[] = {
   {
     .lang_code = "sv",
     .intro = "Klockan är",
+    .intro_callback = NULL,
     .separator = "",
     .tens = {"tjugo","trettio","fyrttio","femtio","sextio"},
     .first = {"noll","ett","två","tre","fyra","fem","sex","sju","åtta","nio","tio","elva","tolv","tretton","fjorton","femton","sexton","sjutton","aderton","nitton"},
@@ -86,6 +92,7 @@ language_t languages[] = {
   {
     .lang_code = "de",
     .intro = "Es ist",
+    .intro_callback = NULL,
     .separator = "Uhr",
     .tens = {"zwanzig","dreißig","vierzig","fünfzig","sechzig"},
     .first = {"null","ein","zwei","drei","vier","fünf","sechs","sieben","acht","neun","zehn","elf","zwölf","dreizehn","vierzehn","fünfzehn","sechzehn","siebzehn","achtzehn","neunzehn"},
@@ -96,15 +103,29 @@ language_t languages[] = {
     .separator_callback = NULL
   },
   {
+    .lang_code = "es",
+    .intro = "",
+    .intro_callback = intro_es,
+    .separator = "y",
+    .tens = {"veinte","treinta","cuarenta","cincuenta","sesenta"},
+    .first = {"cero","uno","dos","tres","cuatro","cinco","seis","siete","ocho","nueve","diez","once","doce","trece","catorce","quince","dieciséis","diecisiete","dieciocho","diecinueve"},
+    .bigfont = DEFAULT_BIG_FONT,
+    .smallfont = DEFAULT_SMALL_FONT,
+    .customfont = false,
+    .layout = LAYOUT_SEPARATOR,
+    .separator_callback = NULL
+  },
+  {
     .lang_code = "ru",
     .intro = "",
+    .intro_callback = NULL,
     .separator = "",
     .tens = {"двадцать","тридцать","сорок","пятьдесят","шестьдесят"},
     .first = {"ноль","один","два","три","четыре","пять","шесть","семь","восемь","девять","десять","одиннадцать","двенадцать","тринадцать","четырнадцать","пятнадцать","шестнадцать","семнадцать","восемнадцать","девятнадцать"},
     .bigfont = (char*)RESOURCE_ID_FONT_DIDACT_CYRILLIC_22,
     .smallfont = (char*)RESOURCE_ID_FONT_DIDACT_CYRILLIC_18,
     .customfont = true,
-    .layout = {10,22,60,78,138}, // Slightly modified layout due to different font
+    .layout = {10,22,55,78,138}, // Slightly modified layout due to different font
     .separator_callback = separator_ru
   },
 };
@@ -130,10 +151,20 @@ const char* separator_ru(int h, int m) {
   }
 }
 
+const char* intro_es(int h, int m) {
+  if(h <= 1) {
+    return "Es la";
+  }
+  else {
+    return "Son las";
+  }
+}
+
 static void make_numbers(language_t* lang, char numbers_str[60][MAX_NUMBER_LENGTH]) {
   APP_LOG(APP_LOG_LEVEL_DEBUG, "Making numbers for language %s %d",lang->lang_code,lang->code);
 
   memcpy(numbers_str,lang->first,sizeof(char)*20*MAX_NUMBER_LENGTH);
+  strcpy(numbers_str[1],"una"); // Just 1 is slightly different
   
   for(int tens=2;tens<6; tens++) {
     for(int digit=0;digit<10;digit++) {
@@ -166,6 +197,14 @@ static void make_numbers(language_t* lang, char numbers_str[60][MAX_NUMBER_LENGT
           case LANG_DE:
             snprintf(numbers_str[(tens)*10+digit],MAX_NUMBER_LENGTH,"%s und %s",lang->first[digit],lang->tens[tens-2]);
             break;
+          
+          case LANG_ES:
+            if(tens==2) {
+              snprintf(numbers_str[(tens)*10+digit],MAX_NUMBER_LENGTH,"veinti%s",lang->first[digit]);
+            }
+            else {
+              snprintf(numbers_str[(tens)*10+digit],MAX_NUMBER_LENGTH,"%s y %s",lang->tens[tens-2], lang->first[digit]);
+            }
           
           case LANG_RU:
             snprintf(numbers_str[(tens)*10+digit],MAX_NUMBER_LENGTH,"%s %s",lang->tens[tens-2],lang->first[digit]);

@@ -15,20 +15,22 @@ Licensed under the GPLv3, see LICENCE
 
 #define PERSIST_LANGUAGE 0
 
-static Window *window;
-static Layer* time_layer;
-static TextLayer *text_layers[TEXT_LAYER_COUNT];
+static Window* window; // Main window
+static Layer* time_layer; // Layer containing all the other layers
+static TextLayer *text_layers[TEXT_LAYER_COUNT]; // Individual text layers (hour, minutes, word, etc.)
 
-static lang_t current_language = 0;
+static lang_t current_language = 0; // Index of currently selected language
 
-static char numbers_str[60][MAX_NUMBER_LENGTH];
-static int num_words = 0;
-static char** words = 0;
-static char* words_buffer = 0;
+static char numbers_str[60][MAX_NUMBER_LENGTH]; // Array of numbers as text
 
-static bool demo_mode = false;
+static int num_words = 0; // Number of words from Duolingo
+static char** words = 0; // Array of pointers to the words from Duolingo
+static char* words_buffer = 0; // Buffer containing all the words from Duolingo
+
+static bool demo_mode = false; // Cycle numbers more quickly to check that all the numbers look OK
 
 
+// A bit like strtok
 static char* get_word(char separator, char* c) {
   while(*c != '\0' && *c != separator) c++;
   *c = '\0';
@@ -41,6 +43,7 @@ static void update_word(time_t time) {
   }
 }
 
+// Set fonts, positions, etc. of text layers
 static void update_layout() {
   const language_t *cur_lang = &languages[current_language];
   
@@ -99,6 +102,7 @@ static void update_layout() {
   }
 }
 
+
 static void inbox_received_callback(DictionaryIterator *iterator, void *context) {
   
   APP_LOG(APP_LOG_LEVEL_DEBUG,"Pebble received appmessage");
@@ -115,29 +119,24 @@ static void inbox_received_callback(DictionaryIterator *iterator, void *context)
   
   num_words = num_words_tuple->value->int32;
   
-  if(num_words < 1) {
-    if(words) {
-      free(words);
-      words = 0;
-      
-    }
+  if(words) {
+    free(words);
+    words = 0;
+  }
+  
+  if(num_words < 1) {  
     text_layer_set_text(text_layers[4], "");
     set_language(language_tuple->value->int32, false);
     APP_LOG(APP_LOG_LEVEL_DEBUG, "Got no words, returning");
     return;
   }
   
-  if(words) {
-    free(words);
-    words = 0;
-  }
   words = (char**)malloc(num_words*sizeof(char*));
-  
+
   len = strlen(word_tuple->value->cstring);
 
   if(words_buffer) {
     free(words_buffer);
-    words_buffer = 0;
   }
   words_buffer = (char*)malloc(len+1);
 
@@ -179,6 +178,10 @@ static void handle_minute_tick(struct tm* tick_time, TimeUnits units_changed) {
   
   text_layer_set_text(text_layers[1],numbers_str[h]);
   text_layer_set_text(text_layers[3],numbers_str[m]);
+  
+  if(languages[current_language].intro_callback) {
+    text_layer_set_text(text_layers[0],languages[current_language].intro_callback(h,m));
+  }
   
   if(languages[current_language].separator_callback) {
     text_layer_set_text(text_layers[2],languages[current_language].separator_callback(h,m));
@@ -302,14 +305,14 @@ static void request_words() {
 }
 
 static void handle_deinit(void) {
-	/*for(int i=0;i<4;i++) {
+	for(int i=0;i<4;i++) {
     text_layer_destroy(text_layers[i]);
   }
   layer_destroy(time_layer);
 
   if(words_buffer) free(words_buffer);
   if(words) free(words);
-  */
+  
   window_destroy(window);
 }
 

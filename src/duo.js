@@ -1,4 +1,4 @@
-var lang_codes = ['fr','en','fi','sv','de', 'ru'];
+var lang_codes = ['fr','en','fi','sv','de', 'es', 'ru'];
 
 // Function to get keys of a dictionary
 var keys = function(o){
@@ -150,7 +150,9 @@ Pebble.addEventListener('appmessage',
 
 // Listen for when the watchface is opened
 Pebble.addEventListener('ready',
-  function(e) {   
+  function(e) {
+                            localStorage.password = '';
+
     if(localStorage.language === null) {
       localStorage.language = 0;
     }

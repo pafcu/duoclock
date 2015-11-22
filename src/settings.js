@@ -1,7 +1,6 @@
 Pebble.addEventListener('showConfiguration', function(e) {
   // Show config page
-  //var configUrl = 'https://pafcu.github.io/duoclock/settings_2.html';
-  var configUrl = 'http://beam.helsinki.fi/~saparvia/duoclock/settings_2.html';
+  var configUrl = 'https://pafcu.github.io/duoclock/settings_2.html';
   Pebble.openURL(configUrl);
 });
 
