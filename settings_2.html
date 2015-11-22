@@ -42,9 +42,6 @@
           </select>
         </label>
       </div>
-      <div class="item-container-footer">
-        Due to technical limitations of the Pebble this setting does not affect Duolingo integration. To show words from Duolingo you may additionally have to change the active course on <a href='https://duolingo.com/'>duolingo.com</a> using your browser.
-      </div>
     </div>
 
     <div class='item-container'>
@@ -56,21 +53,20 @@
             <input type="text" class="item-input" id="username" placeholder="Enter your Duolingo username here">
           </div>
         </label>
-        <!--
-        <label class='item'>
+	<p>To show the correct words you have to change the active course on <a href='https://duolingo.com/'>duolingo.com</a> to match the language you chose above. This is due to technical limitations in the Pebble software. <em>NOTE</em>: Changing the active course on duolingo.com applies to all devices, i.e. if you later change course on e.g. your laptop your Pebble may stop showing words.</p>
+        <!--<label class='item'>
           Password
           <div class="item-input-wrapper">
             <input type="password" class="item-input" id="password" placeholder="Enter your Duolingo password here" disabled='disabled'>
           </div>
         </label>
         <div id='waiver_div'>
-          <label class='item'>
-            I acknowledge I'm being irresponsible with my Duolingo password <input type='checkbox' id='waiver' class='item-toggle' onclick='handleWaiver()'>
-          </label>
-          <div class="item-container-footer">
-            If you do not enter your password, you will only get words from the language you have last used on duolingo.com. However, in general, it is a <em>BAD IDEA</em> to give any password to a third party (such as DuoClock) and, therefore, it is recommended that you <em>DO NOT ENTER YOUR PASSWORD HERE</em>. However, if you really trust this application (maybe you have inspected the source code?) you can enable using a password.
-          </div>
+        <label class='item'>
+          I acknowledge I'm being irresponsible with my Duolingo password <input type='checkbox' id='waiver' class='item-toggle' onclick='handleWaiver()'>
+        </label>
+        <div class="item-container-footer">
         </div>-->
+      </div>
       </div>
     </div>
 
@@ -84,21 +80,21 @@
   function getConfigData() {
     var username = document.getElementById('username');
     var language = document.getElementById('language');
-    var password = document.getElementById('password');
-    var waiver = document.getElementById('waiver');
+    /*var password = document.getElementById('password');
+    var waiver = document.getElementById('waiver');*/
 
     var options = {
       'username': username.value,
       'language': language.value,
-      'password': password.value,
-      'waiver': waiver.checked,
+      /*'password': password.value,
+      'waiver': waiver.checked,*/
     };
 
     // Save for next launch
     localStorage['username'] = options['username'];
-    localStorage['password'] = options['password'];
-    localStorage['waiver'] = options['waiver'];
     localStorage['language'] = options['language'];
+    /*localStorage['password'] = options['password'];
+    localStorage['waiver'] = options['waiver'];*/
     console.log('Got options: ' + JSON.stringify(options));
     return options;
   }
@@ -118,20 +114,24 @@
   var submitButton = document.getElementById('submit_button');
   submitButton.addEventListener('click', function() {
     console.log('Submit');
+
     // Set the return URL depending on the runtime environment
     var return_to = getQueryParam('return_to', 'pebblejs://close#');
     document.location = return_to + encodeURIComponent(JSON.stringify(getConfigData()));
   });
   (function() {
     var username = document.getElementById('username');
-    var password = document.getElementById('password');
-    var waiver = document.getElementById('waiver');
     var language = document.getElementById('language');
+    /*var password = document.getElementById('password');
+    var waiver = document.getElementById('waiver');*/
     // Load any previously saved configuration, if available
     if(localStorage['username']) {
       username.value = localStorage['username'];
     }
-    if(localStorage['password']) {
+    if(localStorage['language']) {
+      language.selectedIndex = localStorage['language'];
+    }
+    /*if(localStorage['password']) {
       password.value = localStorage['password'];
     }
     if(localStorage['waiver']) {
@@ -140,21 +140,17 @@
         document.getElementById('password').disabled = false;
       }
     }
-    if(localStorage['language']) {
-      language.selectedIndex = localStorage['language'];
-    }
-
     if(getQueryParam('iknowwhatimdoing', false)) {
       document.getElementById('waiver_div').style.display='none';
       document.getElementById('password').disabled = false;
-    }
+    }*/
   })();
 
-  function handleWaiver() {
+  /*function handleWaiver() {
     document.getElementById("password").disabled = !document.getElementById("waiver").checked;
     if(!document.getElementById("waiver").checked) {
       document.getElementById("password").value = '';
     }
-  }
+  }*/
   </script>
 </html>
