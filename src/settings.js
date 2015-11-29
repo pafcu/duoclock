@@ -1,4 +1,6 @@
 /*
+Copyright Stefan Parviainen <pafcu@iki.fi> 2015
+
 This file is part of DuoClock.
 
 DuoClock is free software: you can redistribute it and/or modify
