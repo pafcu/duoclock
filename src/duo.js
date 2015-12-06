@@ -21,11 +21,11 @@ var lang_codes = ['fr','en','fi','sv','de', 'es', 'ru'];
 
 // Function to get keys of a dictionary
 var keys = function(o){
-   if (o !== Object(o))
-      throw new TypeError('Object.keys called on non-object');
-   var ret=[],p;
-   for(p in o) if(Object.prototype.hasOwnProperty.call(o,p)) ret.push(p);
-   return ret;
+  if (o !== Object(o))
+    throw new TypeError('Object.keys called on non-object');
+  var ret=[],p;
+  for(p in o) if(Object.prototype.hasOwnProperty.call(o,p)) ret.push(p);
+  return ret;
 };
 
 // Function to send Ajax request
@@ -179,3 +179,5 @@ Pebble.addEventListener('ready',
     setInterval(fetch, 24*60*60*1000); // Update words every day
   }
 );
+
+/* vim: set expandtab tabstop=2 shiftwidth=2: */

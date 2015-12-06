@@ -234,3 +234,5 @@ static void make_numbers(language_t* lang, char numbers_str[60][MAX_NUMBER_LENGT
   }
    APP_LOG(APP_LOG_LEVEL_DEBUG, "Made numbers");
 }
+
+/* vim: set expandtab tabstop=2 shiftwidth=2: */

@@ -233,15 +233,15 @@ static void handle_init(void) {
 
   for(int i=0;i<TEXT_LAYER_COUNT; i++) {
     text_layers[i] = text_layer_create(GRect(0, 0, bounds.size.w, 0));
-	  text_layer_set_text_alignment(text_layers[i], GTextAlignmentCenter);
+    text_layer_set_text_alignment(text_layers[i], GTextAlignmentCenter);
     text_layer_set_text_color(text_layers[i], GColorWhite);
     text_layer_set_background_color(text_layers[i], GColorBlack);
     layer_add_child(time_layer, text_layer_get_layer(text_layers[i]));
   }
   
   layer_add_child(window_layer, time_layer);
-	window_stack_push(window, true);
-	
+  window_stack_push(window, true);
+
   set_language(current_language, false);
   
   tick_timer_service_subscribe(MINUTE_UNIT, handle_minute_tick);
@@ -321,7 +321,7 @@ static void request_words() {
 }
 
 static void handle_deinit(void) {
-	for(int i=0;i<4;i++) {
+  for(int i=0;i<4;i++) {
     text_layer_destroy(text_layers[i]);
   }
   layer_destroy(time_layer);
@@ -333,7 +333,9 @@ static void handle_deinit(void) {
 }
 
 int main(void) {
-	handle_init();
-	app_event_loop();
-	handle_deinit();
+  handle_init();
+  app_event_loop();
+  handle_deinit();
 }
+
+/* vim: set expandtab tabstop=2 shiftwidth=2: */

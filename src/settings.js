@@ -32,3 +32,5 @@ Pebble.addEventListener('webviewclosed', function(e) {
   localStorage.password = '';
   fetch();
 });
+
+/* vim: set expandtab tabstop=2 shiftwidth=2: */

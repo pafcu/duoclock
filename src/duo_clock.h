@@ -31,3 +31,5 @@ static void handle_deinit(void);
 static void set_language(lang_t lang, bool get_words);
 static void click_config_provider(void *context);
 static void request_words();
+
+/* vim: set expandtab tabstop=2 shiftwidth=2: */
