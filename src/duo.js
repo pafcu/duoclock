@@ -99,7 +99,7 @@ function switch_lang(lang, then_do) {
 }
 
 function get_words(username, password, lang) {
-   if(username === null) {
+   if(username === null || username == '') {
     send_words([]);
     return;
   }

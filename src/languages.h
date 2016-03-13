@@ -183,7 +183,9 @@ static void make_numbers(language_t* lang, char numbers_str[60][MAX_NUMBER_LENGT
   APP_LOG(APP_LOG_LEVEL_DEBUG, "Making numbers for language %s %d",lang->lang_code,lang->code);
 
   memcpy(numbers_str,lang->first,sizeof(char)*20*MAX_NUMBER_LENGTH);
-  strcpy(numbers_str[1],"una"); // Just 1 is slightly different
+  if(lang->code == LANG_ES) {
+    strcpy(numbers_str[1],"una"); // Just 1 is slightly different  
+  }
   
   for(int tens=2;tens<6; tens++) {
     for(int digit=0;digit<10;digit++) {

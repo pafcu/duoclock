@@ -32,6 +32,7 @@ Main file
 #define PERSIST_LANGUAGE 0
 
 static Window* window; // Main window
+static Layer* time_layer; // Layer containing all the other layers
 static TextLayer *text_layers[TEXT_LAYER_COUNT]; // Individual text layers (hour, minutes, word, etc.)
 
 static lang_t current_language = 0; // Index of currently selected language
@@ -228,15 +229,17 @@ static void handle_init(void) {
   Layer *window_layer = window_get_root_layer(window);
   GRect bounds = layer_get_frame(window_layer);
 
+  time_layer = layer_create(bounds);
 
   for(int i=0;i<TEXT_LAYER_COUNT; i++) {
     text_layers[i] = text_layer_create(GRect(0, 0, bounds.size.w, 0));
     text_layer_set_text_alignment(text_layers[i], GTextAlignmentCenter);
     text_layer_set_text_color(text_layers[i], GColorWhite);
     text_layer_set_background_color(text_layers[i], GColorBlack);
-    layer_add_child(window_layer, text_layer_get_layer(text_layers[i]));
+    layer_add_child(time_layer, text_layer_get_layer(text_layers[i]));
   }
   
+  layer_add_child(window_layer, time_layer);
   window_stack_push(window, true);
 
   set_language(current_language, false);
@@ -321,6 +324,7 @@ static void handle_deinit(void) {
   for(int i=0;i<4;i++) {
     text_layer_destroy(text_layers[i]);
   }
+  layer_destroy(time_layer);
 
   if(words_buffer) free(words_buffer);
   if(words) free(words);
