@@ -9,7 +9,6 @@
         "configurable"
     ],
     "companyName": "pafcu@iki.fi",
-    "enableMultiJS": false,
     "longName": "DuoClock",
     "projectType": "native",
     "resources": {
@@ -23,12 +22,12 @@
                     "basalt",
                     "chalk"
                 ],
-                "type": "bitmap"
+                "type": "png"
             },
             {
                 "characterRegex": "[\u0430-\u044f ]",
                 "file": "fonts/didact.ttf",
-                "name": "FONT_DIDACT_CYRILLIC_24",
+                "name": "FONT_DIDACT_CYRILLIC_18",
                 "type": "font"
             },
             {
@@ -40,7 +39,7 @@
             {
                 "characterRegex": "[\u0430-\u044f ]",
                 "file": "fonts/didact.ttf",
-                "name": "FONT_DIDACT_CYRILLIC_18",
+                "name": "FONT_DIDACT_CYRILLIC_24",
                 "type": "font"
             }
         ]
@@ -53,7 +52,7 @@
         "chalk"
     ],
     "uuid": "7545c3b2-4e89-4453-91e7-e98a506fc2d7",
-    "versionLabel": "1.2",
+    "versionLabel": "1.1",
     "watchapp": {
         "watchface": true
     }
